@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nitin Muraka | Stock Market Learning Community</title>
+
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1000045249705362');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=1000045249705362&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0B1220;
+    --surface: #121B2E;
+    --surface-2: #17233B;
+    --line: #26334F;
+    --text: #E8ECF4;
+    --text-dim: #93A0B8;
+    --gold: #D4AF37;
+    --gold-dim: #9C8232;
+    --up: #3ECF8E;
+    --down: #FF6B6B;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .grid-overlay{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image:
+      linear-gradient(rgba(212,175,55,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,175,55,0.035) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  /* ---------- Ticker ---------- */
+  .ticker-wrap{
+    position:relative; z-index:2;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+    white-space:nowrap;
+    padding:9px 0;
+  }
+  .ticker{
+    display:inline-flex;
+    animation: scroll-left 26s linear infinite;
+  }
+  .ticker span{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.02em;
+    padding:0 22px;
+    color:var(--text-dim);
+    border-right:1px solid var(--line);
+  }
+  .ticker span.up{color:var(--up);}
+  .ticker span.down{color:var(--down);}
+  @keyframes scroll-left{
+    0%{transform:translateX(0);}
+    100%{transform:translateX(-50%);}
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:relative; z-index:2;
+    padding:20px 22px 0;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .brand{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:19px;
+    letter-spacing:0.01em;
+  }
+  .brand span{color:var(--gold);}
+  .eyebrow-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    color:var(--gold-dim);
+    border:1px solid var(--line);
+    padding:5px 10px;
+    border-radius:2px;
+    letter-spacing:0.08em;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; z-index:2;
+    padding:56px 22px 40px;
+    text-align:center;
+  }
+  .kicker{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--gold);
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    margin-bottom:18px;
+  }
+  .kicker::before{content:"▲ "; color:var(--up);}
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(34px, 9vw, 52px);
+    line-height:1.08;
+    letter-spacing:-0.01em;
+  }
+  h1 em{
+    font-style:italic;
+    color:var(--gold);
+    font-weight:400;
+  }
+  .hero-sub{
+    max-width:420px;
+    margin:20px auto 0;
+    color:var(--text-dim);
+    font-size:15.5px;
+    line-height:1.65;
+  }
+
+  /* signature: animated chart line */
+  .chart-signature{
+    position:relative;
+    max-width:520px;
+    margin:36px auto 0;
+    height:130px;
+  }
+  .chart-signature svg{width:100%; height:100%; overflow:visible;}
+  .chart-line{
+    fill:none;
+    stroke:var(--gold);
+    stroke-width:2;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:900;
+    stroke-dashoffset:900;
+    animation: draw 2.6s ease-out forwards 0.3s;
+    filter: drop-shadow(0 0 6px rgba(212,175,55,0.35));
+  }
+  .chart-fill{
+    opacity:0;
+    animation: fadein 1.2s ease forwards 2.1s;
+  }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  @keyframes fadein{ to{ opacity:1; } }
+  .chart-dot{
+    opacity:0;
+    animation: fadein 0.5s ease forwards 2.5s;
+    fill:var(--gold) !important;
+  }
+  .chart-price{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    fill:var(--gold);
+    opacity:0;
+    animation: fadein 0.5s ease forwards 2.7s;
+  }
+
+  /* ---------- CTA (middle, primary) ---------- */
+  .cta-mid{
+    position:relative; z-index:2;
+    padding:34px 22px 40px;
+    text-align:center;
+  }
+  .cta-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    background:linear-gradient(180deg, #2FB985, #229C6E);
+    color:#08160F;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:16.5px;
+    padding:16px 30px;
+    border-radius:9px;
+    text-decoration:none;
+    box-shadow: 0 10px 30px -8px rgba(46,185,133,0.55);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border:1px solid rgba(255,255,255,0.15);
+  }
+  .cta-btn:active{ transform: scale(0.97); }
+  .cta-btn svg{width:20px; height:20px; flex-shrink:0;}
+  .cta-note{
+    margin-top:12px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--text-dim);
+    letter-spacing:0.03em;
+  }
+  .cta-note strong{color:var(--gold);}
+  .cta-secondary{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    margin-top:16px;
+    color:var(--text-dim);
+    font-size:13px;
+    text-decoration:none;
+    border-bottom:1px solid var(--line);
+    padding-bottom:2px;
+    transition:color 0.15s ease, border-color 0.15s ease;
+  }
+  .cta-secondary:hover{ color:var(--gold); border-color:var(--gold-dim); }
+  .cta-secondary svg{width:14px; height:14px;}
+
+  .cta-btn.ghost{
+    background:transparent;
+    color:var(--text);
+    border:1px solid var(--line);
+    box-shadow:none;
+  }
+
+  /* ---------- About ---------- */
+  section{
+    position:relative; z-index:2;
+    padding:44px 22px;
+    border-top:1px solid var(--line);
+  }
+  .section-head{
+    display:flex; align-items:baseline; gap:10px;
+    margin-bottom:22px;
+  }
+  .section-tag{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--gold-dim);
+    letter-spacing:0.08em;
+  }
+  h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:24px;
+  }
+  .about-text{
+    color:var(--text-dim);
+    font-size:15px;
+    line-height:1.75;
+    max-width:540px;
+  }
+  .about-text strong{color:var(--text); font-weight:600;}
+
+  .stat-row{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:1px;
+    background:var(--line);
+    margin-top:26px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+  }
+  .stat{
+    background:var(--surface);
+    padding:16px 10px;
+    text-align:center;
+  }
+  .stat-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:19px;
+    color:var(--gold);
+  }
+  .stat-label{
+    font-size:10.5px;
+    color:var(--text-dim);
+    margin-top:4px;
+    letter-spacing:0.02em;
+  }
+
+  /* ---------- Offerings ---------- */
+  .offer-list{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    background:var(--line);
+    border:1px solid var(--line);
+    border-radius:8px;
+    overflow:hidden;
+    margin-top:6px;
+  }
+  .offer-item{
+    background:var(--surface);
+    padding:18px 16px;
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .offer-mark{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--up);
+    border:1px solid rgba(62,207,142,0.35);
+    background:rgba(62,207,142,0.08);
+    border-radius:4px;
+    padding:2px 6px;
+    flex-shrink:0;
+    margin-top:2px;
+  }
+  .offer-title{font-weight:600; font-size:15px; margin-bottom:3px;}
+  .offer-desc{color:var(--text-dim); font-size:13.5px; line-height:1.55;}
+
+  /* ---------- Testimonials ---------- */
+  .quote-strip{
+    display:flex;
+    gap:14px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    scroll-snap-type:x mandatory;
+    margin-top:6px;
+  }
+  .quote-strip::-webkit-scrollbar{display:none;}
+  .quote-card{
+    scroll-snap-align:start;
+    min-width:78%;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px;
+    flex-shrink:0;
+  }
+  .quote-text{
+    font-size:14px;
+    line-height:1.6;
+    color:var(--text);
+    font-style:italic;
+  }
+  .quote-author{
+    margin-top:12px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--gold-dim);
+  }
+
+  /* ---------- Final CTA ---------- */
+  .final-cta{
+    text-align:center;
+    background:radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.08), transparent 60%);
+  }
+  .final-cta h2{margin-bottom:10px;}
+  .final-cta p{
+    color:var(--text-dim);
+    font-size:14.5px;
+    max-width:400px;
+    margin:0 auto 26px;
+    line-height:1.6;
+  }
+
+  /* ---------- Disclaimer / Footer ---------- */
+  footer{
+    position:relative; z-index:2;
+    padding:26px 22px 40px;
+    border-top:1px solid var(--line);
+  }
+  .disclaimer{
+    font-size:11.5px;
+    color:var(--text-dim);
+    line-height:1.7;
+    max-width:560px;
+    opacity:0.85;
+  }
+  .disclaimer strong{color:var(--text-dim);}
+  .footer-brand{
+    margin-top:18px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--gold-dim);
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .ticker, .chart-line, .chart-fill, .chart-dot, .chart-price{animation:none !important;}
+    .chart-line{stroke-dashoffset:0;}
+    .chart-fill, .chart-dot, .chart-price{opacity:1 !important;}
+  }
+
+  a:focus-visible, button:focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-overlay"></div>
+
+<div class="ticker-wrap">
+  <div class="ticker" id="ticker"></div>
+</div>
+<div style="text-align:center; font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--text-dim); opacity:0.6; padding:4px 0; background:var(--surface-2); position:relative; z-index:2;">
+  SAMPLE DATA · ILLUSTRATIVE ONLY · NOT REAL MARKET PRICES
+</div>
+
+<header>
+  <div class="brand">NITIN <span>MURAKA</span></div>
+  <div class="eyebrow-tag">LEARN · DISCUSS · GROW</div>
+</header>
+
+<section class="hero" style="border-top:none; padding-top:56px;">
+  <div class="kicker">Stock Market Learning Community</div>
+  <h1>Charts padhna seekho,<br><em>guesswork</em> nahi.</h1>
+  <p class="hero-sub">Nitin Muraka ke saath ek growing community jahan market ko samjha jaata hai — step by step, bina shortcuts ke daawon ke.</p>
+
+  <div class="chart-signature">
+    <svg viewBox="0 0 500 130" preserveAspectRatio="none">
+      <path class="chart-fill" d="M0,95 L40,75 L90,90 L140,60 L190,100 L240,55 L290,80 L340,45 L390,70 L440,50 L500,65 L500,130 L0,130 Z" fill="url(#g1)"/>
+      <defs>
+        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.22"/>
+          <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="chart-line" d="M0,95 L40,75 L90,90 L140,60 L190,100 L240,55 L290,80 L340,45 L390,70 L440,50 L500,65"/>
+      <circle class="chart-dot" cx="500" cy="65" r="4" fill="#D4AF37"/>
+      <text class="chart-price" x="380" y="38">Price movements, illustrative</text>
+    </svg>
+  </div>
+</section>
+
+<div class="cta-mid">
+  <a href="https://t.me/+IOccMMqEqBViYjVl" class="cta-btn" target="_blank" rel="noopener" onclick="fbq('track', 'Subscribe');">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M21.8 4.6 3.4 11.9c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.5c.2.6.4.8.8.8.5 0 .7-.2 1-.5l2.4-2.3 4.8 3.6c.9.5 1.5.2 1.7-.8L23.9 5.9c.3-1.3-.5-1.9-1.6-1.4Z" fill="currentColor"/></svg>
+    Community Se Judein
+  </a>
+  <div class="cta-note">Free · koi payment nahi</div>
+  <br>
+  <a href="#guide" class="cta-secondary">
+    Pehle free learning guide dekhein
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </a>
+</div>
+
+<section id="guide">
+  <div class="section-head">
+    <span class="section-tag">01 / FREE GUIDE</span>
+    <h2>Shuru karne ke liye 4 baatein</h2>
+  </div>
+  <p class="about-text" style="margin-bottom:20px;">Ye woh basics hain jo har naye learner ko pehle samajhne chahiye — koi tip nahi, sirf foundation.</p>
+  <div class="offer-list">
+    <div class="offer-item">
+      <div class="offer-mark">1</div>
+      <div>
+        <div class="offer-title">Candlestick kya batata hai</div>
+        <div class="offer-desc">Har candle ek time period ke open, high, low aur close price ko dikhati hai — colour se pata chalta hai price upar gaya ya neeche.</div>
+      </div>
+    </div>
+    <div class="offer-item">
+      <div class="offer-mark">2</div>
+      <div>
+        <div class="offer-title">Trend ko pehchanna</div>
+        <div class="offer-desc">Price hamesha seedhi line mein nahi chalta — higher highs/higher lows uptrend, lower highs/lower lows downtrend batate hain.</div>
+      </div>
+    </div>
+    <div class="offer-item">
+      <div class="offer-mark">3</div>
+      <div>
+        <div class="offer-title">Risk pehle, profit baad mein</div>
+        <div class="offer-desc">Kisi bhi trade se pehle ye decide karo ki max kitna loss accept karoge — position size usी hisaab se set karo.</div>
+      </div>
+    </div>
+    <div class="offer-item">
+      <div class="offer-mark">4</div>
+      <div>
+        <div class="offer-title">Ek hi source pe bharosa mat karo</div>
+        <div class="offer-desc">Koi bhi "sure-shot tip" follow karne se pehle khud research karo — market mein guarantee jaisi cheez nahi hoti.</div>
+      </div>
+    </div>
+  </div>
+  <div style="text-align:center; margin-top:28px;">
+    <a href="https://t.me/+IOccMMqEqBViYjVl" class="cta-btn ghost" target="_blank" rel="noopener" onclick="fbq('track', 'Subscribe');">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M21.8 4.6 3.4 11.9c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.5c.2.6.4.8.8.8.5 0 .7-.2 1-.5l2.4-2.3 4.8 3.6c.9.5 1.5.2 1.7-.8L23.9 5.9c.3-1.3-.5-1.9-1.6-1.4Z" fill="currentColor"/></svg>
+      Aage ki discussion Telegram par
+    </a>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="section-tag">02 / ABOUT</span>
+    <h2>Nitin Muraka</h2>
+  </div>
+  <p class="about-text">
+    Ek stock market educator jo <strong>practical, beginner-friendly</strong> tareeke se market samjhaate hain — technical basics, chart reading, aur risk management par focus ke saath. Ye community trading tips ka source nahi, ek <strong>seekhne ki jagah</strong> hai jahan har session structured aur discussion-based hota hai.
+  </p>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num">Growing</div><div class="stat-label">Active Community</div></div>
+    <div class="stat"><div class="stat-num">120+</div><div class="stat-label">Learning Sessions</div></div>
+    <div class="stat"><div class="stat-num">Weekly</div><div class="stat-label">Market Updates</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="section-tag">03 / INSIDE THE COMMUNITY</span>
+    <h2>Kya milega</h2>
+  </div>
+  <div class="offer-list">
+    <div class="offer-item">
+      <div class="offer-mark">01</div>
+      <div>
+        <div class="offer-title">Chart Reading Basics</div>
+        <div class="offer-desc">Candlesticks, trends aur patterns ko simple language mein samjhna.</div>
+      </div>
+    </div>
+    <div class="offer-item">
+      <div class="offer-mark">02</div>
+      <div>
+        <div class="offer-title">Live Discussion Sessions</div>
+        <div class="offer-desc">Market movements par open baatcheet, sawaal-jawab ke saath.</div>
+      </div>
+    </div>
+    <div class="offer-item">
+      <div class="offer-mark">03</div>
+      <div>
+        <div class="offer-title">Risk & Money Management</div>
+        <div class="offer-desc">Capital ko protect karna seekhna — sirf entry-exit nahi.</div>
+      </div>
+    </div>
+    <div class="offer-item">
+      <div class="offer-mark">04</div>
+      <div>
+        <div class="offer-title">Weekly Market Recap</div>
+        <div class="offer-desc">Har hafte ke important market events ka short, clear breakdown.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head">
+    <span class="section-tag">04 / MEMBERS SAY</span>
+    <h2>Community feedback</h2>
+  </div>
+  <div class="quote-strip">
+    <div class="quote-card">
+      <div class="quote-text">"Basics itne clearly kabhi nahi samjhe the. Ab charts dekh ke darr nahi lagta."</div>
+      <div class="quote-author">— Community Member, Beginner Batch</div>
+    </div>
+    <div class="quote-card">
+      <div class="quote-text">"Discussion sessions sabse useful hain — har doubt clear ho jaata hai."</div>
+      <div class="quote-author">— Community Member, Beginner Batch</div>
+    </div>
+    <div class="quote-card">
+      <div class="quote-text">"Ek beginner ke liye ye sabse patient aur structured community hai."</div>
+      <div class="quote-author">— Community Member, Beginner Batch</div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <h2>Seekhna shuru karo aaj</h2>
+  <p>Community free hai, koi hidden cost nahi, koi payment nahi maanga jaata.</p>
+  <a href="https://t.me/+IOccMMqEqBViYjVl" class="cta-btn" target="_blank" rel="noopener" onclick="fbq('track', 'Subscribe');">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M21.8 4.6 3.4 11.9c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.5c.2.6.4.8.8.8.5 0 .7-.2 1-.5l2.4-2.3 4.8 3.6c.9.5 1.5.2 1.7-.8L23.9 5.9c.3-1.3-.5-1.9-1.6-1.4Z" fill="currentColor"/></svg>
+    Community Se Judein
+  </a>
+  <br>
+  <a href="#guide" class="cta-secondary">
+    Ya pehle guide dekhein
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+  </a>
+</section>
+
+<footer>
+  <p class="disclaimer">
+    <strong>Disclaimer:</strong> Ye ek educational community hai. Yahan share ki gayi jaankari sirf learning purpose ke liye hai aur ise investment advice nahi maana jaana chahiye. Stock market mein trading/investing risk ke saath aata hai; past performance future results ki guarantee nahi deta. Kripya apna khud ka research karein ya qualified financial advisor se consult karein.
+  </p>
+  <div class="footer-brand">NITIN MURAKA · STOCK MARKET LEARNING COMMUNITY</div>
+  <div style="margin-top:16px; display:flex; gap:16px; flex-wrap:wrap;">
+    <a href="privacy-policy.html" style="color:var(--text-dim); font-size:12px; text-decoration:underline;">Privacy Policy</a>
+    <a href="terms.html" style="color:var(--text-dim); font-size:12px; text-decoration:underline;">Terms & Disclaimer</a>
+    <a href="mailto:contact@yourdomain.com" style="color:var(--text-dim); font-size:12px; text-decoration:underline;">contact@yourdomain.com</a>
+  </div>
+</footer>
+
+<script>
+  const symbols = [
+    ["INDEX A","22,458.30","+0.62%","up"],
+    ["INDEX B","73,890.12","+0.54%","up"],
+    ["STOCK C","48,120.75","-0.21%","down"],
+    ["STOCK D","2,945.60","+1.10%","up"],
+    ["STOCK E","3,812.40","-0.35%","down"],
+    ["STOCK F","1,678.90","+0.44%","up"],
+    ["STOCK G","1,502.20","+0.78%","up"],
+    ["STOCK H","432.15","-0.12%","down"]
+  ];
+  const tickerEl = document.getElementById('ticker');
+  const build = () => symbols.map(([n,p,c,d]) =>
+    `<span class="${d}">${n} &nbsp; ${p} &nbsp; ${c}</span>`
+  ).join('');
+  tickerEl.innerHTML = build() + build();
+</script>
+
+</body>
+</html>
